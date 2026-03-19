@@ -188,27 +188,33 @@ erDiagram
 
 > Đây là bộ giá trị chuẩn hoá đề xuất để thống nhất ERD. Có thể điều chỉnh khi chốt schema vật lý.
 
-### `DOC_GIA.trang_thai`
+### `DOC_GIA.trang_thai` (ReaderStatus)
 
-- `HOAT_DONG`
-- `KHOA`
-- `NGUNG`
+- `ACTIVE`
+- `LOCKED`
+- `INACTIVE`
 
-### `BAN_SAO_SACH.tinh_trang`
+### `DOC_GIA.gioi_tinh` (Gender)
 
-- `SAN_SANG`
-- `DANG_MUON`
-- `HU_HONG`
-- `MAT`
-- `CAN_XU_LY`
+- `MALE`
+- `FEMALE`
+- `OTHER`
 
-### `PHIEU_MUON.tinh_trang`
+### `BAN_SAO_SACH.tinh_trang` (BookCopyStatus)
 
-- `DANG_MUON`
-- `DA_TRA`
-- `CAN_XU_LY`
+- `AVAILABLE`
+- `BORROWED`
+- `DAMAGED`
+- `LOST`
+- `NEEDS_REVIEW`
 
-### `TAI_KHOAN.role`
+### `PHIEU_MUON.tinh_trang` (LoanStatus)
+
+- `BORROWED`
+- `RETURNED`
+- `NEEDS_REVIEW`
+
+### `TAI_KHOAN.role` (AccountRole)
 
 - `ADMIN`
 - `LIBRARIAN`

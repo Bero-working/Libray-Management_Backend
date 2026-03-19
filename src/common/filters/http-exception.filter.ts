@@ -47,10 +47,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const exceptionResponse = exception.getResponse();
       const normalizedMessage = this.extractMessage(exceptionResponse);
 
+      let code = this.mapStatusToCode(status);
+      if (
+        typeof exceptionResponse === 'object' &&
+        exceptionResponse !== null &&
+        'code' in exceptionResponse &&
+        typeof (exceptionResponse as { code?: unknown }).code === 'string'
+      ) {
+        code = (exceptionResponse as { code: string }).code;
+      }
+
       return {
         success: false,
         error: {
-          code: this.mapStatusToCode(status),
+          code,
           message: normalizedMessage,
         },
       };

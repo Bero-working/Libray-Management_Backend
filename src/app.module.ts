@@ -16,6 +16,11 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { AccountsModule } from './modules/accounts/accounts.module';
 import { StaffModule } from './modules/staff/staff.module';
+import { ReadersModule } from './modules/readers/readers.module';
+import { MajorsModule } from './modules/majors/majors.module';
+import { TitlesModule } from './modules/titles/titles.module';
+import { CopiesModule } from './modules/copies/copies.module';
+import { LoansModule } from './modules/loans/loans.module';
 
 @Module({
   imports: [
@@ -35,6 +40,11 @@ import { StaffModule } from './modules/staff/staff.module';
     AuthModule,
     StaffModule,
     AccountsModule,
+    ReadersModule,
+    MajorsModule,
+    TitlesModule,
+    CopiesModule,
+    LoansModule,
   ],
   controllers: [AppController],
   providers: [
