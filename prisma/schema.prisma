@@ -1,0 +1,174 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ReaderStatus {
+  ACTIVE
+  LOCKED
+  INACTIVE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum BookCopyStatus {
+  AVAILABLE
+  BORROWED
+  DAMAGED
+  LOST
+  NEEDS_REVIEW
+}
+
+enum LoanStatus {
+  BORROWED
+  RETURNED
+  NEEDS_REVIEW
+}
+
+enum StaffStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum AccountRole {
+  ADMIN
+  LIBRARIAN
+  LEADER
+}
+
+enum AccountStatus {
+  ACTIVE
+  LOCKED
+  INACTIVE
+}
+
+model Reader {
+  id         BigInt       @id @default(autoincrement())
+  code       String       @unique @map("ma_doc_gia")
+  fullName   String       @map("ho_ten")
+  className  String       @map("lop")
+  birthDate  DateTime     @db.Date @map("ngay_sinh")
+  gender     Gender       @map("gioi_tinh")
+  status     ReaderStatus @map("trang_thai")
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  loans      Loan[]
+
+  @@index([deletedAt])
+  @@map("readers")
+}
+
+model Major {
+  id         BigInt      @id @default(autoincrement())
+  code       String      @unique @map("ma_chuyen_nganh")
+  name       String      @map("ten_chuyen_nganh")
+  description String?    @map("mo_ta")
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt  DateTime?   @map("deleted_at") @db.Timestamptz(6)
+  titles     BookTitle[]
+
+  @@index([deletedAt])
+  @@map("majors")
+}
+
+model BookTitle {
+  id          BigInt      @id @default(autoincrement())
+  code        String      @unique @map("ma_dau_sach")
+  name        String      @map("ten_dau_sach")
+  publisher   String      @map("nha_xuat_ban")
+  pageCount   Int         @map("so_trang")
+  size        String      @map("kich_thuoc")
+  author      String      @map("tac_gia")
+  majorId     BigInt      @map("major_id")
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?   @map("deleted_at") @db.Timestamptz(6)
+  major       Major       @relation(fields: [majorId], references: [id])
+  copies      BookCopy[]
+
+  @@index([deletedAt])
+  @@index([majorId])
+  @@map("book_titles")
+}
+
+model BookCopy {
+  id          BigInt         @id @default(autoincrement())
+  code        String         @unique @map("ma_sach")
+  bookTitleId BigInt         @map("book_title_id")
+  status      BookCopyStatus @map("tinh_trang")
+  acquiredAt  DateTime       @db.Date @map("ngay_nhap")
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  bookTitle   BookTitle      @relation(fields: [bookTitleId], references: [id])
+  loans       Loan[]
+
+  @@index([deletedAt])
+  @@index([bookTitleId, status])
+  @@map("book_copies")
+}
+
+model Staff {
+  id          BigInt         @id @default(autoincrement())
+  code        String         @unique @map("ma_nhan_vien")
+  fullName    String         @map("ho_ten")
+  contactInfo String         @map("thong_tin_lien_he")
+  status      StaffStatus    @map("trang_thai")
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  loans       Loan[]
+  account     StaffAccount?
+
+  @@index([deletedAt])
+  @@map("staff")
+}
+
+model StaffAccount {
+  id           BigInt        @id @default(autoincrement())
+  username     String        @unique
+  passwordHash String        @map("password_hash")
+  role         AccountRole
+  status       AccountStatus @map("trang_thai")
+  staffId      BigInt        @unique @map("staff_id")
+  refreshTokenHash String?   @map("refresh_token_hash")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime      @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt    DateTime?     @map("deleted_at") @db.Timestamptz(6)
+  staff        Staff         @relation(fields: [staffId], references: [id])
+
+  @@index([deletedAt])
+  @@map("staff_accounts")
+}
+
+model Loan {
+  id          BigInt       @id @default(autoincrement())
+  readerId    BigInt       @map("reader_id")
+  bookCopyId  BigInt       @map("book_copy_id")
+  staffId     BigInt       @map("staff_id")
+  loanedAt    DateTime     @db.Date @map("ngay_muon")
+  returnedAt  DateTime?    @db.Date @map("ngay_tra")
+  status      LoanStatus   @map("tinh_trang")
+  returnNote  String?      @map("ghi_chu_tinh_trang")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime?    @map("deleted_at") @db.Timestamptz(6)
+  reader      Reader       @relation(fields: [readerId], references: [id])
+  bookCopy    BookCopy     @relation(fields: [bookCopyId], references: [id])
+  staff       Staff        @relation(fields: [staffId], references: [id])
+
+  @@index([deletedAt])
+  @@index([readerId, loanedAt(sort: Desc)])
+  @@index([bookCopyId, loanedAt(sort: Desc)])
+  @@index([status, loanedAt(sort: Desc)])
+  @@map("loans")
+}
