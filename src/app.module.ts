@@ -21,6 +21,8 @@ import { MajorsModule } from './modules/majors/majors.module';
 import { TitlesModule } from './modules/titles/titles.module';
 import { CopiesModule } from './modules/copies/copies.module';
 import { LoansModule } from './modules/loans/loans.module';
+import { SearchModule } from './modules/search/search.module';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { LoansModule } from './modules/loans/loans.module';
     TitlesModule,
     CopiesModule,
     LoansModule,
+    SearchModule,
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [

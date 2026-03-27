@@ -85,5 +85,11 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "overrides": {
+    "@prisma/dev": {
+      "hono": "4.12.8",
+      "@hono/node-server": "1.19.11"
+    }
   }
 }
