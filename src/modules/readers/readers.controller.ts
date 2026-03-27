@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -11,14 +12,24 @@ import {
   StreamableFile,
   Version,
 } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiProduces } from '@nestjs/swagger';
 import type { Response } from 'express';
 
+import {
+  ApiBadRequestErrorResponse,
+  ApiConflictErrorResponse,
+  ApiNotFoundErrorResponse,
+  ApiProtectedResource,
+  ApiSuccessResponse,
+} from '../../common/swagger/swagger.decorators';
+import { ReaderResponseDto } from '../../common/swagger/swagger.models';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ReadersPdfService } from './readers-pdf.service';
 import { ReadersService } from './readers.service';
 import { CreateReaderDto } from './dto/create-reader.dto';
 import { UpdateReaderDto } from './dto/update-reader.dto';
 
+@ApiProtectedResource('Readers')
 @Controller('readers')
 @Roles(AccountRole.LIBRARIAN)
 export class ReadersController {
@@ -27,24 +38,51 @@ export class ReadersController {
     private readonly readersPdfService: ReadersPdfService,
   ) {}
 
+  @ApiOperation({ summary: 'List all active readers' })
+  @ApiSuccessResponse({
+    description: 'Readers retrieved successfully',
+    type: ReaderResponseDto,
+    isArray: true,
+  })
   @Get()
   @Version('1')
   findAll() {
     return this.readersService.findAll();
   }
 
+  @ApiOperation({ summary: 'Get a reader by code' })
+  @ApiSuccessResponse({
+    description: 'Reader retrieved successfully',
+    type: ReaderResponseDto,
+  })
+  @ApiNotFoundErrorResponse('Reader not found')
   @Get(':code')
   @Version('1')
   findOne(@Param('code') code: string) {
     return this.readersService.findOneByCode(code);
   }
 
+  @ApiOperation({ summary: 'Create a reader' })
+  @ApiSuccessResponse({
+    status: 201,
+    description: 'Reader created successfully',
+    type: ReaderResponseDto,
+  })
+  @ApiBadRequestErrorResponse()
+  @ApiConflictErrorResponse('Reader code already exists')
   @Post()
   @Version('1')
   create(@Body() createReaderDto: CreateReaderDto) {
     return this.readersService.create(createReaderDto);
   }
 
+  @ApiOperation({ summary: 'Update a reader' })
+  @ApiSuccessResponse({
+    description: 'Reader updated successfully',
+    type: ReaderResponseDto,
+  })
+  @ApiBadRequestErrorResponse()
+  @ApiNotFoundErrorResponse('Reader not found')
   @Patch(':code')
   @Version('1')
   update(
@@ -54,13 +92,31 @@ export class ReadersController {
     return this.readersService.update(code, updateReaderDto);
   }
 
+  @ApiOperation({ summary: 'Soft-delete a reader' })
+  @ApiSuccessResponse({
+    description: 'Reader removed successfully',
+    type: ReaderResponseDto,
+  })
+  @ApiNotFoundErrorResponse('Reader not found')
+  @ApiConflictErrorResponse('Reader has unreturned loan')
   @Delete(':code')
   @Version('1')
   remove(@Param('code') code: string) {
     return this.readersService.softDelete(code);
   }
 
+  @ApiOperation({ summary: 'Generate a reader card PDF' })
+  @ApiProduces('application/pdf')
+  @ApiOkResponse({
+    description: 'Reader card generated successfully',
+    schema: {
+      type: 'string',
+      format: 'binary',
+    },
+  })
+  @ApiNotFoundErrorResponse('Reader not found')
   @Post(':code/print-card')
+  @HttpCode(200)
   @Version('1')
   async printCard(
     @Param('code') code: string,
